@@ -43,9 +43,26 @@
         </v-layout>
     </v-flex>
 
+    <v-flex xs10>
+        <v-layout row wrap >
+            <v-flex xs7>
+                AudioContextでTTS呼び出し（buffer）
+            </v-flex>
 
+            <v-flex xs3>
+                <v-btn fab small color=primary @click="playSound">
+                    <v-icon dark>volume_up</v-icon>
+                </v-btn>
+            </v-flex>
+        </v-layout>
+    </v-flex>
 
     </v-layout>
+
+    <div v-if="logMessage.length > 0">
+        {{ logMessage }}
+    </div>
+
   </v-container>
 </template>
 
@@ -55,6 +72,7 @@ import { Vue, Component } from 'vue-property-decorator';
 @Component
 export default class Content extends Vue {
     private text: string = 'サンプルテキストです。';
+    private logMessage: string = '';
     private ttsApiUrl: string = 'https://arcane-temple-52272.herokuapp.com/?text=';
 
     private blowserSpeak() {
@@ -72,8 +90,8 @@ export default class Content extends Vue {
             msg.lang = 'ja-JP';
             msg.text = this.text;
             speechSynthesis.speak(msg);
-        } catch (_) {
-            // AndroidのWebVew対応のためエラーは握りつぶす。
+        } catch (e) {
+            this.logMessage = e;
         }
     }
 
@@ -83,6 +101,31 @@ export default class Content extends Vue {
 
     private getApiUrl(): string {
         return `${this.ttsApiUrl}${this.text}`
+    }
+
+    private audioContext = new ((<any>window).AudioContext || (<any>window).webkitAudioContext)();
+    private playSound() {
+        const AudioContext = (<any>window).AudioContext || (<any>window).webkitAudioContext;
+        const ctx = new AudioContext();
+        this.logMessage = 'start request'
+        // iOSで音声再生するための手段
+        // 参考: https://qiita.com/zprodev/items/7fcd8335d7e8e613a01f
+        ctx.createBufferSource().start();
+
+        const request = new XMLHttpRequest();
+        const url = this.getApiUrl();
+        request.open('GET', url, true);
+        request.responseType = 'arraybuffer';
+        request.onload =  () => {
+            this.logMessage = 'request loaded'
+            ctx.decodeAudioData(request.response, (audioBuffer: any) => {
+                const audioSource = ctx.createBufferSource();
+                audioSource.buffer = audioBuffer;
+                audioSource.connect(ctx.destination);
+                audioSource.start();
+            });
+        }
+        request.send();
     }
 }
 </script>
