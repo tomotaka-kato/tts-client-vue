@@ -1,10 +1,10 @@
 <template>
   <v-container>
     <v-layout
-      text-center
+        text-center
         justify-space-around
         row
-      wrap
+        wrap
     >
     <v-flex xs10>
         <v-text-field 
@@ -13,7 +13,7 @@
         ></v-text-field>
     </v-flex>
 
-    <v-flex xs10>
+    <v-flex xs10 class="sample-wrapper">
         <v-layout row wrap >
             <v-flex xs7>
                 speechSynthesis
@@ -29,7 +29,7 @@
             
 
 
-    <v-flex xs10>
+    <v-flex xs10 class="sample-wrapper">
         <v-layout row wrap >
             <v-flex xs7>
                 TTSのAPIを直接表示
@@ -43,7 +43,7 @@
         </v-layout>
     </v-flex>
 
-    <v-flex xs10>
+    <v-flex xs10 class="sample-wrapper">
         <v-layout row wrap >
             <v-flex xs7>
                 AudioContextでTTS呼び出し（buffer）
@@ -57,7 +57,7 @@
         </v-layout>
     </v-flex>
 
-    <v-flex xs10>
+    <v-flex xs10 class="sample-wrapper">
         <v-layout row wrap >
             <v-flex xs7>
                 HowlerでTTS呼び出し
@@ -163,6 +163,9 @@ export default class Content extends Vue {
 </script>
 
 <style>
+.sample-wrapper {
+    height: 70px;
+}
 </style>
 
 
