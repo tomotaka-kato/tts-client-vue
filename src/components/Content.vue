@@ -57,6 +57,20 @@
         </v-layout>
     </v-flex>
 
+    <v-flex xs10>
+        <v-layout row wrap >
+            <v-flex xs7>
+                HowlerでTTS呼び出し
+            </v-flex>
+
+            <v-flex xs3>
+                <v-btn fab small color=primary @click="playHowler">
+                    <v-icon dark>volume_up</v-icon>
+                </v-btn>
+            </v-flex>
+        </v-layout>
+    </v-flex>
+
     </v-layout>
 
     <div v-if="logMessage.length > 0">
@@ -68,12 +82,14 @@
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator';
+import { Howl, Howler } from 'howler';
 
 @Component
 export default class Content extends Vue {
     private text: string = 'サンプルテキストです。';
     private logMessage: string = '';
     private ttsApiUrl: string = 'https://arcane-temple-52272.herokuapp.com/?text=';
+    private ttsDownloadApiUrl: string = 'https://arcane-temple-52272.herokuapp.com/download?text=';
 
     private blowserSpeak() {
         try {
@@ -103,7 +119,10 @@ export default class Content extends Vue {
         return `${this.ttsApiUrl}${this.text}`
     }
 
-    private audioContext = new ((<any>window).AudioContext || (<any>window).webkitAudioContext)();
+    private getDownloadApiUrl(): string {
+        return `${this.ttsDownloadApiUrl}${this.text}`
+    }
+
     private playSound() {
         const AudioContext = (<any>window).AudioContext || (<any>window).webkitAudioContext;
         const ctx = new AudioContext();
@@ -123,9 +142,22 @@ export default class Content extends Vue {
                 audioSource.buffer = audioBuffer;
                 audioSource.connect(ctx.destination);
                 audioSource.start();
+                this.logMessage = '';
             });
         }
         request.send();
+    }
+
+    private playHowler() {
+        this.logMessage = 'loading...'
+        const sound = new Howl({
+            src : [this.getApiUrl()],
+            autoplay: true,
+            format: ['wav'],
+            onend: () => { // 再生完了時のendイベント
+                this.logMessage = '';
+            }
+        })
     }
 }
 </script>
